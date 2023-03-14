@@ -4,6 +4,7 @@ import { mountSuspended, registerEndpoint } from 'vitest-environment-nuxt/utils'
 
 import App from '~/app.vue'
 import FetchComponent from '~/components/FetchComponent.vue'
+import AsyncComponentWithProps from '~~/components/AsyncComponentWithProps.vue'
 
 describe('client-side nuxt features', () => {
   it('can use core nuxt composables within test file', () => {
@@ -41,6 +42,35 @@ describe('test utils', () => {
       <!-- TODO: <NuxtPage /> -->
       <a href=\\"/test\\">Test link</a>"
     `)
+  })
+
+  it('should render default props within nuxt suspense', async () => {
+    const component = await mountSuspended(AsyncComponentWithProps)
+    expect(component.find('h2').html()).toMatchInlineSnapshot(
+      '"<h2>The original</h2>"'
+    )
+  })
+
+  it('should render passed props within nuxt suspense', async () => {
+    const component = await mountSuspended(AsyncComponentWithProps, {
+      props: {
+        title: 'title from mount suspense props',
+      },
+    })
+    expect(component.find('h2').html()).toMatchInlineSnapshot(
+      '"<h2>title from mount suspense props</h2>"'
+    )
+  })
+
+  it('can pass slots to mounted components within nuxt suspense', async () => {
+    const component = await mountSuspended(AsyncComponentWithProps, {
+      slots: {
+        default: 'slot from mount suspense',
+      },
+    })
+    expect(component.find('div').html()).toMatchInlineSnapshot(
+      '"<div>slot from mount suspense</div>"'
+    )
   })
 
   it('can mock fetch requests', async () => {

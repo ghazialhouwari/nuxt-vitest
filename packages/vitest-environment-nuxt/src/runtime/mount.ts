@@ -1,4 +1,4 @@
-import { mount, VueWrapper } from '@vue/test-utils'
+import { mount, MountingOptions, VueWrapper } from '@vue/test-utils'
 import { h, DefineComponent, Suspense, nextTick } from 'vue'
 
 import { RouterLink } from './components/RouterLink'
@@ -8,7 +8,7 @@ import NuxtRoot from '#build/root-component.mjs'
 
 export async function mountSuspended<
   T extends DefineComponent<any, any, any, any>
->(component: T) {
+>(component: T, options?: MountingOptions<any>) {
   return new Promise<VueWrapper<InstanceType<T>>>(resolve => {
     const vm = mount(
       {
@@ -17,12 +17,22 @@ export async function mountSuspended<
           h(
             Suspense,
             { onResolve: () => nextTick().then(() => resolve(vm as any)) },
-            { default: () => h(component) }
+            {
+              default: () =>
+                h(
+                  component,
+                  { ...options?.props, ...options?.attrs },
+                  { ...options?.slots }
+                ),
+            }
           ),
       },
       {
+        ...options,
         global: {
+          ...options?.global,
           components: {
+            ...options?.global?.components,
             RouterLink,
           },
         },
